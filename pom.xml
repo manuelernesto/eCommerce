@@ -11,7 +11,6 @@
 	<groupId>com.example</groupId>
 	<artifactId>auth-course</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>auth-course</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -42,6 +41,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>3.8.1</version>
 		</dependency>
 	</dependencies>
 
