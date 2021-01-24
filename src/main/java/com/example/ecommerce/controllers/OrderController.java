@@ -1,9 +1,9 @@
-package com.example.demo.controllers;
+package com.example.ecommerce.controllers;
 
-import com.example.demo.model.persistence.User;
-import com.example.demo.model.persistence.UserOrder;
-import com.example.demo.model.persistence.repositories.OrderRepository;
-import com.example.demo.model.persistence.repositories.UserRepository;
+import com.example.ecommerce.model.persistence.User;
+import com.example.ecommerce.model.persistence.UserOrder;
+import com.example.ecommerce.model.persistence.repositories.OrderRepository;
+import com.example.ecommerce.model.persistence.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

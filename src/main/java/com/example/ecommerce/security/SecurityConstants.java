@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.example.ecommerce.security;
 
 public class SecurityConstants {
     public static final String SECRET = "oursecretkey";

@@ -1,12 +1,12 @@
-package com.example.demo.controllers;
+package com.example.ecommerce.controllers;
 
-import com.example.demo.model.persistence.Cart;
-import com.example.demo.model.persistence.Item;
-import com.example.demo.model.persistence.User;
-import com.example.demo.model.persistence.repositories.CartRepository;
-import com.example.demo.model.persistence.repositories.ItemRepository;
-import com.example.demo.model.persistence.repositories.UserRepository;
-import com.example.demo.model.requests.ModifyCartRequest;
+import com.example.ecommerce.model.persistence.Cart;
+import com.example.ecommerce.model.persistence.Item;
+import com.example.ecommerce.model.persistence.User;
+import com.example.ecommerce.model.persistence.repositories.CartRepository;
+import com.example.ecommerce.model.persistence.repositories.ItemRepository;
+import com.example.ecommerce.model.persistence.repositories.UserRepository;
+import com.example.ecommerce.model.requests.ModifyCartRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

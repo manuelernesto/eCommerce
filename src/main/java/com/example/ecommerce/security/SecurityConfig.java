@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.example.ecommerce.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;

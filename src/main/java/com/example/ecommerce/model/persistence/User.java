@@ -1,4 +1,4 @@
-package com.example.demo.model.persistence;
+package com.example.ecommerce.model.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

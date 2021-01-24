@@ -1,7 +1,7 @@
-package com.example.demo.security;
+package com.example.ecommerce.security;
 
-import com.example.demo.model.persistence.User;
-import com.example.demo.model.persistence.repositories.UserRepository;
+import com.example.ecommerce.model.persistence.User;
+import com.example.ecommerce.model.persistence.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

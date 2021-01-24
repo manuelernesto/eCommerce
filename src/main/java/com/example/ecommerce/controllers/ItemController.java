@@ -1,7 +1,7 @@
-package com.example.demo.controllers;
+package com.example.ecommerce.controllers;
 
-import com.example.demo.model.persistence.Item;
-import com.example.demo.model.persistence.repositories.ItemRepository;
+import com.example.ecommerce.model.persistence.Item;
+import com.example.ecommerce.model.persistence.repositories.ItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
