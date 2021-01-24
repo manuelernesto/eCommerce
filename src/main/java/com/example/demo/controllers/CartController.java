@@ -7,6 +7,8 @@ import com.example.demo.model.persistence.repositories.CartRepository;
 import com.example.demo.model.persistence.repositories.ItemRepository;
 import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.ModifyCartRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,7 @@ import java.util.stream.IntStream;
 @RequestMapping("/api/cart")
 public class CartController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
@@ -46,6 +49,7 @@ public class CartController {
         IntStream.range(0, request.getQuantity())
                 .forEach(i -> cart.addItem(item.get()));
         cartRepository.save(cart);
+        logger.info("Add item {} with quantity {} to cart for username {}", request.getItemId(), request.getQuantity(), user.getUsername());
         return ResponseEntity.ok(cart);
     }
 
@@ -63,6 +67,7 @@ public class CartController {
         IntStream.range(0, request.getQuantity())
                 .forEach(i -> cart.removeItem(item.get()));
         cartRepository.save(cart);
+        logger.info("Remove item {} with quantity {} from cart for username {}", request.getItemId(), request.getQuantity(), user.getUsername());
         return ResponseEntity.ok(cart);
     }
 
