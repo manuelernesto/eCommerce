@@ -1,151 +1,127 @@
 package com.example.ecommerce.controllers;
 
+import com.example.ecommerce.TestUtils;
+import com.example.ecommerce.model.persistence.Cart;
+import com.example.ecommerce.model.persistence.User;
+import com.example.ecommerce.model.persistence.repositories.CartRepository;
 import com.example.ecommerce.model.persistence.repositories.UserRepository;
 import com.example.ecommerce.model.requests.CreateUserRequest;
-import com.jayway.jsonpath.JsonPath;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.net.URI;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureJsonTesters
 public class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    private WebApplicationContext context;
-    @Autowired
-    private JacksonTester<CreateUserRequest> json;
+    private UserController userController;
+    private final UserRepository userRepository = mock(UserRepository.class);
+    private final CartRepository cartRepository = mock(CartRepository.class);
+    private final BCryptPasswordEncoder encoder = mock(BCryptPasswordEncoder.class);
 
-    private final String jwt = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYW51ZWxlcm5lc3QwIiwiZXhwIjoxNjEyMTkwODUxfQ.64R8XMKzCxH4oeqV_vGHhkRfdM0ZrW9koC2sXD_JnDBYe9UtxP4YyV-L3L25ZftYUuEiYEPaZog3_9k2FuqTQ";
-    private final HttpHeaders httpHeaders = new HttpHeaders();
-    private final String username = "manuelernesto";
-    private final String password = "manuelernesto";
-    private final String wrongPassword = "manuelernest0";
-    private final String lessPassword = "manuel";
 
     @Before
     public void setUp() {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(springSecurity())
-                .build();
+        userController = new UserController(null, null, null);
+        TestUtils.injectObjects(userController, "userRepository", userRepository);
+        TestUtils.injectObjects(userController, "cartRepository", cartRepository);
+        TestUtils.injectObjects(userController, "bCryptPasswordEncoder", encoder);
+
+        User user = new User();
+        Cart cart = new Cart();
+
+        user.setId(0);
+        user.setUsername("manuelernesto");
+        user.setPassword("manuelernest0Password");
+        user.setCart(cart);
+
+        when(userRepository.findByUsername("manuelernesto")).thenReturn(user);
+        when(userRepository.findById(0L)).thenReturn(java.util.Optional.of(user));
+        when(userRepository.findByUsername("ernesto")).thenReturn(null);
+
     }
 
 
     @Test
-    public void findByIdTest() throws Exception {
-        CreateUserRequest createUserRequest = getUserRequest();
-        MvcResult postResult = mockMvc.perform(post(new URI("/api/user/create"))
-                .content(json.write(createUserRequest).getJson())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-        Integer id = JsonPath.read(postResult.getResponse().getContentAsString(), "$.id");
-        String uri = "/api/user/id/" + id;
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(new URI(uri))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-        Assert.assertNotNull(result.getResponse().getContentAsString());
+    public void create_user_Test() {
+        when(encoder.encode("manuelernest0Password")).thenReturn("thisIsHashed");
+        CreateUserRequest r = new CreateUserRequest();
+        r.setUsername("manuelernesto");
+        r.setPassword("manuelernest0Password");
+        r.setConfirmPassword("manuelernest0Password");
+        final ResponseEntity<User> response = userController.createUser(r);
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        User u = response.getBody();
+        assertNotNull(u);
+        assertEquals(0, u.getId());
+        assertEquals("manuelernesto", u.getUsername());
+        assertEquals("thisIsHashed", u.getPassword());
+
+    }
+
+
+    @Test
+    public void create_user_password_too_short_Test() {
+        CreateUserRequest r = new CreateUserRequest();
+        r.setUsername("manuelernesto");
+        r.setPassword("manuel");
+        r.setConfirmPassword("manuel");
+        final ResponseEntity<User> response = userController.createUser(r);
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCodeValue());
+    }
+
+
+    @Test
+    public void create_user_password_confirm_mismatch_Test() {
+        CreateUserRequest r = new CreateUserRequest();
+        r.setUsername("manuelernesto");
+        r.setPassword("manuelernest0Password");
+        r.setConfirmPassword("manuelernestoPassword");
+        final ResponseEntity<User> response = userController.createUser(r);
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCodeValue());
     }
 
     @Test
-    public void findByUserNameTest() throws Exception {
-        CreateUserRequest createUserRequest = getUserRequest();
-        mockMvc.perform(post(new URI("/api/user/create"))
-                .content(json.write(createUserRequest).getJson())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(new URI("/api/user/" + username))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-        Assert.assertNotNull(result.getResponse().getContentAsString());
+    public void find_user_by_name_Test() {
+        final ResponseEntity<User> response = userController.findByUserName("manuelernesto");
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        User u = response.getBody();
+        assertNotNull(u);
+        assertEquals("manuelernesto", u.getUsername());
     }
 
     @Test
-    public void createUserTest() throws Exception {
-        CreateUserRequest createUserRequest = getUserRequest();
-        mockMvc.perform(post(new URI("/api/user/create"))
-                .content(json.write(createUserRequest).getJson())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-//    @Test
-//    public void loginTest() throws Exception {
-//        CreateUserRequest user = getUserRequest();
-//        createUser();
-//        MvcResult response = mockMvc.perform(
-//                post("/login")
-//                        .content(json.write(user).getJson())
-//                        .contentType(MediaType.APPLICATION_JSON_UTF8))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//        httpHeaders.set(HttpHeaders.AUTHORIZATION, response.getResponse().getHeader("Authorization"));
-//    }
-
-    @Test
-    public void passwordDoesNotMatchTest() throws Exception {
-        CreateUserRequest createUserRequest = getUserRequest();
-        createUserRequest.setConfirmPassword(wrongPassword);
-        mockMvc.perform(post(new URI("/api/user/create"))
-                .content(json.write(createUserRequest).getJson())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    public void find_user_by_name_doesnt_exist_Test() {
+        final ResponseEntity<User> response = userController.findByUserName("manuel");
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCodeValue());
     }
 
     @Test
-    public void passwordLessThanSevenCharsTest() throws Exception {
-        CreateUserRequest createUserRequest = getUserRequest();
-        createUserRequest.setConfirmPassword(lessPassword);
-        mockMvc.perform(post(new URI("/api/user/create"))
-                .content(json.write(createUserRequest).getJson())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    public void find_user_by_id_Test() {
+        final ResponseEntity<User> response = userController.findById(0L);
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        User u = response.getBody();
+        assertNotNull(u);
+        assertEquals(0, u.getId());
+        ;
     }
 
 
-    /*Private Methods*/
-    private CreateUserRequest getUserRequest() {
-        CreateUserRequest user = new CreateUserRequest();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setConfirmPassword(password);
-        return user;
+    @Test
+    public void find_user_by_id_doesnt_exist_Test() {
+        final ResponseEntity<User> response = userController.findById(1L);
+        assertNotNull(response);
+        assertEquals(404, response.getStatusCodeValue());
     }
-
-    private void createUser() throws Exception {
-        CreateUserRequest createUserRequest = getUserRequest();
-        mockMvc.perform(post(new URI("/api/user/create"))
-                .content(json.write(createUserRequest).getJson())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
 }
